@@ -1,0 +1,65 @@
+
+FUNCTION_BLOCK riego
+    VAR_INPUT
+        humedad:REAL;
+	    temperatura:REAL;
+        
+        
+    END_VAR
+
+    VAR_OUTPUT
+        tiempo:REAL;
+        horario:REAL;
+    END_VAR
+
+    FUZZIFY humedad
+        TERM seco:=(0,1) (5,0);
+        TERM humedo:=(3,0) (20,1) (65,1) (76,0);
+        TERM muyhumedo:=(65,0) (76,1) (100,1);
+    END_FUZZIFY
+
+    FUZZIFY temperatura
+        TERM helado:=(-10,1) (0,1) (5,0);
+        TERM frio:=(0,0) (7.5,1) (15,0);
+        TERM templada:=(10,0) (17.5,1) (25,0);
+        TERM caliente:=(20,0) (27.5,1) (35,0);
+        TERM muycaliente:=(30,0) (35,1) (45,1);
+    END_FUZZIFY
+        
+
+
+    DEFUZZIFY tiempo
+        TERM nada:=(0,0) (0,0);
+        TERM normal:=(0.1,0) (0.1,1) (5,1) (5,0);
+        TERM mucho:=(5.1,0) (5.1,1) (10,1) (10,0);
+        METHOD:COG;
+        DEFAULT:=0;
+        RANGE:=(0 .. 10);
+    END_DEFUZZIFY
+
+    DEFUZZIFY horario
+        TERM temprano:=(0,1) (6,1) (6,0);
+        TERM noche:=(19.5,0) (19.5,1) (23,1) (23,0);
+        METHOD:COG;
+        DEFAULT:=0;
+        RANGE:=(0 .. 23);
+    END_DEFUZZIFY
+
+    RULEBLOCK riegoreglas
+        RULE 1:IF(humedad IS seco) AND (temperatura IS helado) THEN tiempo IS mucho,horario IS temprano;
+        RULE 2:IF(humedad IS seco) AND (temperatura IS frio) THEN tiempo IS mucho , horario IS temprano;           
+        RULE 3:IF(humedad IS seco) AND (temperatura IS templada) THEN tiempo IS mucho , horario IS temprano;
+        RULE 4:IF(humedad IS seco) AND (temperatura IS caliente) THEN tiempo IS mucho , horario IS temprano;      
+        RULE 5:IF(humedad IS seco) AND (temperatura IS muycaliente) THEN tiempo IS mucho , horario IS temprano;  
+        RULE 6:IF(humedad IS humedo) AND (temperatura IS helado) THEN tiempo IS nada;
+        RULE 7:IF(humedad IS humedo) AND (temperatura IS frio) THEN tiempo IS normal , horario IS noche;      
+        RULE 8:IF(humedad IS humedo) AND (temperatura IS templada) THEN tiempo IS mucho , horario IS noche;
+        RULE 9:IF(humedad IS humedo) AND (temperatura IS caliente) THEN tiempo IS normal , horario IS temprano;
+        RULE 10:IF(humedad IS humedo) AND (temperatura IS muycaliente) THEN tiempo IS normal , horario IS temprano;
+        RULE 11:IF (humedad IS muyhumedo) AND (temperatura IS helado) THEN tiempo IS nada;
+        RULE 12:IF (humedad IS muyhumedo) AND (temperatura IS frio) THEN tiempo IS nada;
+        RULE 13:IF (humedad IS muyhumedo) AND (temperatura IS templada) THEN tiempo IS nada;
+        RULE 14:IF (humedad IS muyhumedo) AND (temperatura IS caliente) THEN tiempo IS nada;
+        RULE 15:IF (humedad IS muyhumedo) AND (temperatura IS muycaliente) THEN tiempo IS normal , horario IS temprano;
+	END_RULEBLOCK
+END_FUNCTION_BLOCK
